@@ -1,6 +1,6 @@
-import {Connection, PublicKey, LAMPORTS_PER_SOL} from '@solana/web3.js';
+import {LAMPORTS_PER_SOL, PublicKey} from '@solana/web3.js';
 import type {NextApiRequest, NextApiResponse} from 'next';
-import {getNodeURL} from '@figment-solana/lib';
+import fundLib from '../../../lib/solana/fund';
 
 export default async function fund(
   req: NextApiRequest,
@@ -8,11 +8,8 @@ export default async function fund(
 ) {
   try {
     const {network, address} = req.body;
-    const url = getNodeURL(network);
-    const connection = new Connection(url, 'confirmed');
-    const publicKey = undefined;
-    const hash = undefined;
-    await undefined;
+    const receiver = new PublicKey(address);
+    const hash = await fundLib(receiver, LAMPORTS_PER_SOL, network);
     res.status(200).json(hash);
   } catch (error) {
     let errorMessage = error instanceof Error ? error.message : 'Unknown Error';
