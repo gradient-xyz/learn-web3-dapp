@@ -3,10 +3,11 @@ import {LoadingOutlined, RedoOutlined} from '@ant-design/icons';
 import {transactionExplorer} from '@figment-solana/lib';
 import {ErrorT, ErrorBox, prettyError} from 'utils/error';
 import {useEffect, useState} from 'react';
-import {Keypair} from '@solana/web3.js';
+import {Keypair, LAMPORTS_PER_SOL} from '@solana/web3.js';
 import axios from 'axios';
 import {getInnerState} from 'utils/context';
 import {useGlobalState} from 'context';
+import fund from '../../../../lib/solana/fund';
 
 const layout = {
   labelCol: {span: 4},
@@ -28,9 +29,19 @@ const Transfer = () => {
   const [hash, setHash] = useState<string | null>(null);
   const [fetching, setFetching] = useState(false);
 
-  const generate = () => {
+  const generate = async () => {
+    setFetching(true);
     const keypair = Keypair.generate();
     const address = keypair.publicKey.toString();
+    try {
+      await fund(keypair.publicKey, LAMPORTS_PER_SOL, network);
+    } catch (error) {
+      let errorMessage =
+        error instanceof Error ? error.message : 'Unknown Error';
+      setError({message: errorMessage});
+    } finally {
+      setFetching(false);
+    }
     setRecipient(address);
   };
 
